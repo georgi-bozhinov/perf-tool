@@ -7,9 +7,10 @@ import (
 
 var amount = flag.Int("t", 100, "Request amount")
 var url = flag.String("u", "", "Url to call")
+var concurrency = flag.Int("c", 1, "Number of requests to run at the same time")
 
 func main() {
 	flag.Parse()
 
-	perf.PerfTest(*amount, *url)
+	perf.RunPerfTest(*amount, *url, *concurrency)
 }

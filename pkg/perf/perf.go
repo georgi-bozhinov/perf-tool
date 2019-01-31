@@ -47,24 +47,27 @@ func fetch(url string, ch chan<- string) {
 }
 
 // PerfTest performs a user-defined amount of requests to a given url
-func PerfTest(amount int, url string) {
+func RunPerfTest(amount int, url string, concurrency int) {
 	start := time.Now()
+
+	groups := amount / concurrency
+
+	arr := make([]struct{}, concurrency)
 	ch := make(chan string)
+	for i := 0; i < groups; i++ {
+		for range arr {
+			go fetch(url, ch)
+		}
 
-	arr := make([]struct{}, amount)
-	for range arr {
-		go fetch(url, ch)
-	}
-
-	var output strings.Builder
-	for range arr {
-		output.WriteString(<-ch)
+		var output strings.Builder
+		for range arr {
+			output.WriteString(<-ch)
+		}
+		fmt.Println(output.String())
 	}
 
 	since := time.Since(start).Seconds()
-	fmt.Println(output.String())
-	fmt.Printf("Requests per second: %.2f\n", float64(count) / since)
-	fmt.Printf("Request rate: %.2f\n", float64(count) / float64(amount))
+	fmt.Printf("Request rate: %.2f\n", float64(count)/float64(amount))
 	fmt.Printf("%.2fs elapsed\n", time.Since(start).Seconds())
+	fmt.Printf("Requests per second: %.2f\n", float64(count)/since)
 }
-
